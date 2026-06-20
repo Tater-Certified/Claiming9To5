@@ -1,5 +1,6 @@
 package com.github.tatercertified.claiming9to5;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 
 public class ClaimingGamerules {
@@ -21,7 +22,12 @@ public class ClaimingGamerules {
         CHUNK_REWARDING_PERIOD_SECONDS = GameRules.register(
                 Claiming9to5.MODID + ":chunks_reward_period_seconds",
                 GameRules.Category.MISC,
-                GameRules.IntegerValue.create(3600)
+                GameRules.IntegerValue.create(3600, ((server, integerValue) -> {
+                    long currentTime = System.currentTimeMillis();
+                    for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                        ((PlayerTimeTracker) player).setNextRewardTime(currentTime);
+                    }
+                }))
         );
 
         DISABLE_ONLINE_PLAYER_CLAIMS = GameRules.register(

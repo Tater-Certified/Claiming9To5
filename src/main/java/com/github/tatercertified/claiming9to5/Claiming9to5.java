@@ -3,7 +3,6 @@ package com.github.tatercertified.claiming9to5;
 import dev.ftb.mods.ftbchunks.api.ChunkTeamData;
 import dev.ftb.mods.ftbchunks.api.FTBChunksAPI;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -29,8 +28,7 @@ public class Claiming9to5 {
     @SubscribeEvent
     public void onPlayerPostTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            int totalPlayTimeTicks = player.getStats().getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
-            if (totalPlayTimeTicks > 0 && totalPlayTimeTicks % (player.level().getGameRules().getInt(ClaimingGamerules.CHUNK_REWARDING_PERIOD_SECONDS) * 20) == 0) {
+            if (((PlayerTimeTracker) player).isRewardTime(System.currentTimeMillis())) {
                 grantChunks(player);
             }
         }
