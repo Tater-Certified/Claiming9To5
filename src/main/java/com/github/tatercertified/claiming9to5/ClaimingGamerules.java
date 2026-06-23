@@ -1,5 +1,7 @@
 package com.github.tatercertified.claiming9to5;
 
+import dev.ftb.mods.ftbchunks.api.FTBChunksAPI;
+import dev.ftb.mods.ftbchunks.data.ChunkTeamDataImpl;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 
@@ -10,6 +12,7 @@ public class ClaimingGamerules {
     public static GameRules.Key<GameRules.IntegerValue> CLAIM_ENABLE_AFTER_SECONDS_OFFLINE;
     public static GameRules.Key<GameRules.IntegerValue> CLAIM_DISABLE_AFTER_SECONDS_ONLINE;
     public static GameRules.Key<GameRules.IntegerValue> TEAM_PERCENT_ONLINE_DISABLES_CLAIMS;
+    public static GameRules.Key<GameRules.IntegerValue> MAX_PLAYER_CHUNK_CLAIMS;
 
 
     public static void registerGameRules() {
@@ -26,6 +29,17 @@ public class ClaimingGamerules {
                     long currentTime = System.currentTimeMillis();
                     for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                         ((PlayerTimeTracker) player).setNextRewardTime(currentTime);
+                    }
+                }))
+        );
+
+        MAX_PLAYER_CHUNK_CLAIMS = GameRules.register(
+                Claiming9to5.MODID + ":max_chunk_claims",
+                GameRules.Category.MISC,
+                GameRules.IntegerValue.create(10, ((server, integerValue) -> {
+                    for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                        ChunkTeamDataImpl teamData = (ChunkTeamDataImpl) FTBChunksAPI.api().getManager().getPersonalData(player.getUUID());
+                        teamData.setExtraClaimChunks(Math.min(integerValue.get(), teamData.getExtraClaimChunks()));
                     }
                 }))
         );

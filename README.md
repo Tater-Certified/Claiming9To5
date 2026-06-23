@@ -18,6 +18,7 @@ Hey, what a way to make a living! But rest assured that your base can still be p
 | claiming9to5:claim_disable_logon_delay           | 60            | The delay before disabling claims when a player joins                                                                   |
 | claiming9to5:claim_enable_logoff_delay           | 60            | The delay before enabling claims when a player leaves                                                                   |
 | claiming9to5:disable_online_player_claims        | true          | Whether to disable claims when players are online                                                                       |
+| claiming9to5:max_chunk_claims                    | 10            | The maximum number of chunk claims a player can obtain. Set to -1 to disable                                            |
 | claiming9to5:team_percent_online_disables_claims | 1             | The percentage of players that have to be online to disable claims. Setting this to 0 will make claims always disabled! |
 
 ## Supported Versions

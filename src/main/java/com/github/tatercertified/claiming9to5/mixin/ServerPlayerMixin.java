@@ -17,20 +17,23 @@ public abstract class ServerPlayerMixin implements PlayerTimeTracker {
     @Shadow
     public abstract ServerLevel serverLevel();
 
-    private long nextTimeMs;
+    private long nextTimeMs = -1;
 
     @Override
     public void setNextRewardTime(long currentTime) {
         int totalPlayTimeTicks = this.getStats().getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
-        if (totalPlayTimeTicks == 0) {
-            totalPlayTimeTicks++;
-        }
-        int ticksTillNext = totalPlayTimeTicks % (this.serverLevel().getGameRules().getInt(ClaimingGamerules.CHUNK_REWARDING_PERIOD_SECONDS) * 20);
-        this.nextTimeMs = currentTime + ticksTillNext / 20;
+        int chunkRewardingTicks = this.serverLevel().getGameRules().getInt(ClaimingGamerules.CHUNK_REWARDING_PERIOD_SECONDS) * 20;
+        int ticksTillNext = chunkRewardingTicks - totalPlayTimeTicks % chunkRewardingTicks;
+        this.nextTimeMs = currentTime + (ticksTillNext * 50L); // Turn ticks into ms
     }
 
     @Override
     public boolean isRewardTime(long currentTime) {
+        if (this.nextTimeMs < 0) {
+            setNextRewardTime(currentTime);
+            return false;
+        }
+
         boolean result = currentTime >= nextTimeMs;
         if (result) {
             setNextRewardTime(currentTime);

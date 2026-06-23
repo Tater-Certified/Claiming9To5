@@ -17,15 +17,15 @@ public interface TimeTracker {
     void setLastLogoff(long currentTime);
     boolean claimDisabledCache();
     void setClaimDisabledCache(boolean enable);
-    Team getTeam();
+    Team team();
 
     default int relativeToThreshold(MinecraftServer server) {
-        int teamSize = getTeam().getMembers().size();
+        int teamSize = team().getMembers().size();
         int percentRequired = server.getGameRules().getInt(ClaimingGamerules.TEAM_PERCENT_ONLINE_DISABLES_CLAIMS);
         // If this threshold is reached, claims will be disabled after x seconds
         int playerOnlineThreshold = (int) Math.ceil((teamSize * percentRequired) / 100.0);
         // This should be < 0 to be ok
-        return getTeam().getOnlineMembers().size() - playerOnlineThreshold;
+        return team().getOnlineMembers().size() - playerOnlineThreshold;
     }
 
     default boolean pastLogOffTimeBuffer(MinecraftServer server, long currentTime) {

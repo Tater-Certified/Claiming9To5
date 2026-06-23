@@ -47,7 +47,7 @@ public class ChunkTeamDataImplMixin implements TimeTracker {
     }
 
     @Override
-    public Team getTeam() {
+    public Team team() {
         return this.team;
     }
 }

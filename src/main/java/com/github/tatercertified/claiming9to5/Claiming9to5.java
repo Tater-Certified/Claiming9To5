@@ -1,7 +1,9 @@
 package com.github.tatercertified.claiming9to5;
 
-import dev.ftb.mods.ftbchunks.api.ChunkTeamData;
 import dev.ftb.mods.ftbchunks.api.FTBChunksAPI;
+import dev.ftb.mods.ftbchunks.data.ChunkTeamDataImpl;
+import dev.ftb.mods.ftbchunks.net.SendGeneralDataPacket;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -35,9 +37,21 @@ public class Claiming9to5 {
     }
 
     private static void grantChunks(ServerPlayer player) {
-        ChunkTeamData data = FTBChunksAPI.api().getManager().getOrCreateData(player);
+        int maxClaimChunks = player.getServer().getGameRules().getInt(ClaimingGamerules.MAX_PLAYER_CHUNK_CLAIMS);
+        // Update player data
+        ChunkTeamDataImpl data = (ChunkTeamDataImpl) FTBChunksAPI.api().getManager().getPersonalData(player.getUUID());
         int currentExtra = data.getExtraClaimChunks();
-        data.setExtraClaimChunks(currentExtra + player.level().getGameRules().getInt(ClaimingGamerules.CHUNKS_REWARDED_PER_TIME_PERIOD));
+
+        if (maxClaimChunks == -1 || maxClaimChunks > currentExtra) {
+            data.setExtraClaimChunks(Math.min(maxClaimChunks, currentExtra + player.level().getGameRules().getInt(ClaimingGamerules.CHUNKS_REWARDED_PER_TIME_PERIOD)));
+            data.markDirty();
+
+            // Update team data
+            ChunkTeamDataImpl teamData = (ChunkTeamDataImpl) FTBChunksAPI.api().getManager().getOrCreateData(player);
+            teamData.updateLimits();
+            SendGeneralDataPacket.send(teamData, player);
+            player.sendSystemMessage(Component.literal("You now have " + data.getExtraClaimChunks() + " claim chunks"), true);
+        }
     }
 
     @SubscribeEvent
